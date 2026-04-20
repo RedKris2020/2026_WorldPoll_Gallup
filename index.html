@@ -1702,8 +1702,6 @@ const FIREBASE_CONFIG = {
   storageBucket: "world-poll-2026-suivi.firebasestorage.app",
   messagingSenderId: "60107164689",
   appId: "1:60107164689:web:21f895804dbb2faa9b35b0"
-
-
 };
 
 // ════════════════════════════════════════════════════════════
@@ -1770,18 +1768,19 @@ function defaultPerms(role) {
 }
 
 const DEFAULT_ACCOUNTS = [
-  // ⚠️ SÉCURITÉ : Les comptes sont maintenant gérés via Firebase Auth.
-  // Cette liste sert uniquement de mapping login → métadonnées (rôle, pays, permissions).
-  // Les mots de passe sont gérés par Firebase Auth (jamais stockés dans ce fichier).
-  // Utilisez l'écran "Comptes & Accès" pour créer/modifier des utilisateurs après première connexion.
-  { login: 'admin', nom: 'Administrateur', avatar: 'AD', role: 'admin', pays: null, perms: defaultPerms('admin') },
+  // Les comptes sont maintenant gérés via Firebase Auth et créés à la volée
+  // au premier déverrouillage du vault. Le premier utilisateur à se connecter
+  // est automatiquement promu admin.
 ];
 
 // Utilisateur connecté en session
 let SESSION_USER = null; // { login, nom, avatar, role, pays, perms }
 
 function getAccounts() {
-  return DB.accounts || DEFAULT_ACCOUNTS;
+  // Filtre : on retire les anciens placeholders fictifs (comptes sans uid ni email Firebase)
+  // qui ont pu rester dans la DB depuis les versions précédentes.
+  const accs = DB.accounts || DEFAULT_ACCOUNTS;
+  return accs.filter(a => a.uid || a.email);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -4501,9 +4500,11 @@ async function afterUnlockSuccess(fbUser) {
   // Trouver / créer les métadonnées du user dans DB.accounts
   let accounts = getAccounts();
   let userMeta = accounts.find(a => a.uid === fbUser.uid || a.email === fbUser.email);
+  // Vérifier s'il existe au moins un admin dans la base
+  const hasAnyAdmin = accounts.some(a => a.role === 'admin');
   if (!userMeta) {
-    // Si c'est le seul compte (premier admin), promouvoir admin
-    const role = accounts.length === 0 ? 'admin' : 'invite';
+    // Premier admin si aucun admin n'existe encore
+    const role = !hasAnyAdmin ? 'admin' : 'invite';
     userMeta = {
       uid: fbUser.uid,
       email: fbUser.email,
@@ -4516,6 +4517,16 @@ async function afterUnlockSuccess(fbUser) {
     };
     DB.accounts = accounts.concat([userMeta]);
     await save();
+  } else if (!hasAnyAdmin && userMeta.role !== 'admin') {
+    // Filet de sécurité : si aucun admin n'existe et cet utilisateur est le créateur du vault,
+    // le promouvoir admin (sinon la plateforme devient ingérable)
+    userMeta.role = 'admin';
+    userMeta.perms = defaultPerms('admin');
+    const idx = accounts.findIndex(a => a.uid === fbUser.uid || a.email === fbUser.email);
+    if (idx > -1) {
+      DB.accounts[idx] = userMeta;
+      await save();
+    }
   }
   SESSION_USER = userMeta;
   DB.currentUser = userMeta.nom;
