@@ -676,12 +676,12 @@ input[type=date]{cursor:pointer;}
     <!-- Étape 1 : Création compte -->
     <div id="setupPane1">
       <h1>🔐 Première utilisation</h1>
-      <p class="sec-sub">Bienvenue. Cette plateforme utilise un <b>chiffrement zero-knowledge</b> : vos données sont chiffrées dans votre navigateur avant d'être envoyées. Personne — ni Firebase, ni Anthropic, ni aucun tiers — ne peut les lire sans votre mot de passe maître.</p>
+      <p class="sec-sub">Bienvenue. Cette plateforme utilise un <b>chiffrement de données</b> : vos données sont chiffrées dans votre navigateur avant d'être envoyées. Personne ni aucun tiers — ne peut les lire sans votre mot de passe maître.</p>
       <label>E-MAIL ADMINISTRATEUR</label>
       <input type="email" id="setupEmail" placeholder="admin@votredomaine.com" autocomplete="username">
       <label>MOT DE PASSE DE CONNEXION</label>
       <input type="password" id="setupAuthPw" placeholder="Au moins 10 caractères" autocomplete="new-password">
-      <p class="sec-sub" style="margin-top:6px;font-size:11px">Ce mot de passe sert à vous authentifier auprès de Firebase (verrouille l'accès).</p>
+      <p class="sec-sub" style="margin-top:6px;font-size:11px">Ce mot de passe sert à vous authentifier auprès de votre base de données (verrouille l'accès).</p>
       <label>MOT DE PASSE MAÎTRE (chiffrement)</label>
       <input type="password" id="setupMasterPw" placeholder="Phrase secrète longue et unique" autocomplete="new-password">
       <input type="password" id="setupMasterPw2" placeholder="Confirmer le mot de passe maître" autocomplete="new-password" style="margin-top:8px">
@@ -713,12 +713,12 @@ input[type=date]{cursor:pointer;}
     <div id="setupPane3" style="display:none">
       <h1>✅ Plateforme sécurisée</h1>
       <div class="sec-ok">
-        🔐 Votre vault est prêt. Vos données seront chiffrées avec AES-256-GCM avant chaque envoi à Firebase.
+        🔐 Votre plateforme est prêt. Vos données seront chiffrées avec sécurité avant chaque envoi à votre base de données.
       </div>
       <p class="sec-sub" style="margin-top:16px">Ce que vous devriez faire maintenant :</p>
       <ul style="font-size:12.5px;line-height:1.8;color:var(--g700);padding-left:18px">
-        <li>Configurer les <b>règles Firestore</b> (voir fichier <code>firestore.rules</code>)</li>
-        <li>Ajouter <code>robots.txt</code> à la racine du repo GitHub</li>
+        <li>Configurer les <b>règles</b> (voir fichier <code>firestore.rules</code>)</li>
+        <li>Ajouter <code>robots</code> à la racine</li>
         <li>Inviter d'autres utilisateurs depuis <b>Comptes &amp; Accès</b></li>
       </ul>
       <button class="sec-btn" onclick="doSetupStep3()">Accéder à la plateforme →</button>
